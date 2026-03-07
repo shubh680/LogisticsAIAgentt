@@ -23,6 +23,25 @@ MODEL = "llama-3.1-8b-instant"
 
 def _build_prompt(event: dict) -> str:
     """Construct the LLM prompt from the shipment event signals."""
+    delay_prob = event.get("delay_probability")
+    ml_line = (
+        f"- ML Predicted Delay Probability (XGBoost model, 0–1): {delay_prob:.4f}"
+        if delay_prob is not None
+        else ""
+    )
+    ml_instruction = (
+        "5. Interpret the ML Predicted Delay Probability — explain whether it aligns "
+        "with or contradicts the operational signals, and factor it into your risk score."
+        if delay_prob is not None
+        else ""
+    )
+    ml_field = (
+        f'"ml_delay_probability": {delay_prob},\n  '
+        f'"ml_interpretation": "<one sentence explaining what the ML score means in context>",'
+        if delay_prob is not None
+        else ""
+    )
+
     return f"""You are a logistics risk analyst AI. Analyze the following shipment signals and return a structured risk assessment.
 
 Shipment Signals:
@@ -31,16 +50,19 @@ Shipment Signals:
 - Carrier Reliability (0–1, higher = more reliable): {event["carrier_reliability"]}
 - Traffic Delay Index (0–1, higher = worse traffic): {event["traffic_delay"]}
 - Estimated Time of Arrival (hours): {event["eta_hours"]}
+{ml_line}
 
 Based on these signals:
 1. Determine the overall risk level: "low", "medium", or "high"
 2. Identify the root causes of potential delay (list of short phrases)
 3. Estimate a numeric risk score between 0.0 and 1.0
 4. Recommend a specific logistics intervention to mitigate the risk
+{ml_instruction}
 
 Respond ONLY with valid JSON in exactly this format — no extra text, no markdown:
 {{
   "shipment_id": "{event["shipment_id"]}",
+  {ml_field}
   "risk_level": "<low|medium|high>",
   "risk_score": <float between 0.0 and 1.0>,
   "root_causes": ["<cause 1>", "<cause 2>"],

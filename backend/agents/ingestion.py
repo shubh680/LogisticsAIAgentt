@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from groq import Groq
 from .firebase_client import FirebaseManager
 from .risk_reasoning_agent import risk_reasoning_agent
+from .delay_predictor import predict_delay
 
 # Carrier name → reliability score (0–1)
 _CARRIER_RELIABILITY = {
@@ -110,12 +111,15 @@ class IngestionAgent:
         for row in self._live_data:
             event = _to_risk_event(row)
             try:
+                # Get ML prediction first, inject into event so LLM can reason on it
+                event["delay_probability"] = predict_delay(row)
                 assessment = risk_reasoning_agent(event)
+                assessment["delay_probability"] = event["delay_probability"]
                 # Enrich with raw context from Firebase for downstream agents
-                assessment["carrier"] = row.get("carrier")
-                assessment["weather"] = row.get("weather")
+                assessment["carrier"]    = row.get("carrier")
+                assessment["weather"]    = row.get("weather")
                 assessment["is_delayed"] = bool(row.get("is_delayed"))
-                assessment["priority"] = row.get("shipment_priority")
+                assessment["priority"]   = row.get("shipment_priority")
                 results.append(assessment)
             except Exception as exc:
                 results.append({"shipment_id": event["shipment_id"], "error": str(exc)})
@@ -177,6 +181,15 @@ class IngestionAgent:
             """Run risk reasoning agent on all live shipments and return results."""
             assessments = self.analyze_risks()
             return json.dumps(assessments, default=str)
+
+        def predict_delay_for_shipment(shipment_id: str) -> str:
+            """Predict ML delay probability for a single shipment by ID."""
+            _ensure_live()
+            row = self.get_shipment(shipment_id)
+            if row is None:
+                return f"No shipment found with ID '{shipment_id}'."
+            prob = predict_delay(row)
+            return json.dumps({"shipment_id": shipment_id, "delay_probability": prob})
 
         tool_schemas = [
             {
@@ -243,21 +256,42 @@ class IngestionAgent:
                     "description": (
                         "Run the Risk Reasoning Agent on all live shipments. "
                         "Returns a risk assessment (risk_level, risk_score, root_causes, "
-                        "recommended_action) for every shipment."
+                        "recommended_action, delay_probability) for every shipment."
                     ),
                     "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "predict_delay_for_shipment",
+                    "description": (
+                        "Use the ML model to predict the delay probability (0–1) "
+                        "for a specific shipment by its ID."
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "shipment_id": {
+                                "type": "string",
+                                "description": "The shipment ID to predict delay for.",
+                            }
+                        },
+                        "required": ["shipment_id"],
+                    },
                 },
             },
         ]
 
         tool_map = {
-            "fetch_live_data": fetch_live_data,
-            "get_live_shipments": get_live_shipments,
-            "lookup_shipment": lookup_shipment,
-            "get_delayed": get_delayed,
-            "get_high_priority": get_high_priority,
-            "get_summary_stats": get_summary_stats,
-            "get_risk_analysis": get_risk_analysis,
+            "fetch_live_data":             fetch_live_data,
+            "get_live_shipments":          get_live_shipments,
+            "lookup_shipment":             lookup_shipment,
+            "get_delayed":                 get_delayed,
+            "get_high_priority":           get_high_priority,
+            "get_summary_stats":           get_summary_stats,
+            "get_risk_analysis":           get_risk_analysis,
+            "predict_delay_for_shipment":  predict_delay_for_shipment,
         }
 
         return tool_schemas, tool_map

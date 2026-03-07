@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import time
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -100,10 +101,13 @@ class IngestionAgent:
             row for row in self._live_data if row.get("shipment_priority") == "High"
         ]
 
-    def analyze_risks(self, delay_between_calls: float = 1.5) -> list[dict]:
+    def analyze_risks(self, delay_between_calls: float = 10.0) -> list[dict]:
         """
         Run risk_reasoning_agent on every shipment in the live cache.
         Returns a list of risk assessment dicts, one per shipment.
+
+        delay_between_calls: seconds to wait between LLM calls (default 10s).
+        Groq free tier = 6 000 TPM / ~800 tokens per call ≈ 7.5 calls/min max.
         """
         if not self._live_data:
             self.fetch_live()
@@ -111,27 +115,107 @@ class IngestionAgent:
         results = []
         for row in self._live_data:
             event = _to_risk_event(row)
-            try:
-                # Step 1: ML model — predict delay probability
-                event["delay_probability"] = predict_delay(row)
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    # Step 1: ML model — predict delay probability
+                    event["delay_probability"] = predict_delay(row)
 
-                # Step 2: LLM Risk Reasoning Agent — reasons on signals + ML score
-                assessment = risk_reasoning_agent(event)
-                assessment["delay_probability"] = event["delay_probability"]
-                assessment["carrier"]    = row.get("carrier")
-                assessment["weather"]    = row.get("weather")
-                assessment["is_delayed"] = bool(row.get("is_delayed"))
-                assessment["priority"]   = row.get("shipment_priority")
+                    # Step 2: LLM Risk Reasoning Agent — reasons on signals + ML score
+                    assessment = risk_reasoning_agent(event)
+                    assessment["delay_probability"] = event["delay_probability"]
+                    assessment["carrier"]        = row.get("carrier")
+                    assessment["weather"]        = row.get("weather")
+                    assessment["priority"]       = row.get("shipment_priority")
+                    assessment["shipment_value"] = row.get("shipment_value")
+                    assessment["last_checkpoint"] = row.get("last_checkpoint")
 
-                # Step 3: Policy Engine — decides if human approval is needed
-                assessment["policy"] = evaluate_policy(assessment)
+                    # Compute is_delayed from planned_arrival
+                    # (Firebase live data has no is_delayed field)
+                    planned_str = row.get("planned_arrival", "")
+                    try:
+                        planned = datetime.fromisoformat(planned_str)
+                        if planned.tzinfo is None:
+                            planned = planned.replace(tzinfo=timezone.utc)
+                        assessment["is_delayed"] = (
+                            planned - datetime.now(timezone.utc)
+                        ).total_seconds() < 0
+                    except (ValueError, TypeError):
+                        assessment["is_delayed"] = False
 
-                results.append(assessment)
-            except Exception as exc:
-                results.append({"shipment_id": event["shipment_id"], "error": str(exc)})
-            time.sleep(delay_between_calls)  # respect Groq rate limits
+                    # Forward event signals so callers can display them
+                    assessment["warehouse_load"] = event["warehouse_load"]
+                    assessment["traffic_delay"]  = event["traffic_delay"]
+                    assessment["eta_hours"]       = event["eta_hours"]
+
+                    # Step 3: Policy Engine — decides if human approval is needed
+                    assessment["policy"] = evaluate_policy(assessment)
+
+                    results.append(assessment)
+                    break  # success — exit retry loop
+
+                except Exception as exc:
+                    err_str = str(exc)
+                    # If Groq returned a rate-limit error, honour the retry-after
+                    match = re.search(r"try again in ([\d.]+)s", err_str)
+                    if match and attempt < max_retries - 1:
+                        wait = float(match.group(1)) + 1.0
+                        time.sleep(wait)
+                        continue
+                    results.append({"shipment_id": event["shipment_id"], "error": err_str})
+                    break
+
+            time.sleep(delay_between_calls)  # respect Groq TPM rate limit
 
         return results
+
+    def analyze_risks_iter(self, delay_between_calls: float = 10.0):
+        """
+        Generator variant of analyze_risks.
+        Yields one result dict per shipment so callers can update their store
+        incrementally rather than waiting for the full batch to finish.
+        """
+        if not self._live_data:
+            self.fetch_live()
+
+        for row in self._live_data:
+            event = _to_risk_event(row)
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    event["delay_probability"] = predict_delay(row)
+                    assessment = risk_reasoning_agent(event)
+                    assessment["delay_probability"] = event["delay_probability"]
+                    assessment["carrier"]        = row.get("carrier")
+                    assessment["weather"]        = row.get("weather")
+                    assessment["priority"]       = row.get("shipment_priority")
+                    assessment["shipment_value"] = row.get("shipment_value")
+                    assessment["last_checkpoint"] = row.get("last_checkpoint")
+                    planned_str = row.get("planned_arrival", "")
+                    try:
+                        planned = datetime.fromisoformat(planned_str)
+                        if planned.tzinfo is None:
+                            planned = planned.replace(tzinfo=timezone.utc)
+                        assessment["is_delayed"] = (
+                            planned - datetime.now(timezone.utc)
+                        ).total_seconds() < 0
+                    except (ValueError, TypeError):
+                        assessment["is_delayed"] = False
+                    assessment["warehouse_load"] = event["warehouse_load"]
+                    assessment["traffic_delay"]  = event["traffic_delay"]
+                    assessment["eta_hours"]       = event["eta_hours"]
+                    assessment["policy"] = evaluate_policy(assessment)
+                    yield assessment
+                    break
+                except Exception as exc:
+                    err_str = str(exc)
+                    match = re.search(r"try again in ([\d.]+)s", err_str)
+                    if match and attempt < max_retries - 1:
+                        time.sleep(float(match.group(1)) + 1.0)
+                        continue
+                    yield {"shipment_id": event["shipment_id"], "error": err_str}
+                    break
+            time.sleep(delay_between_calls)
 
     def _build_tools(self) -> tuple[list[dict], dict]:
         """Return Groq-compatible tool schemas and a dispatch map."""

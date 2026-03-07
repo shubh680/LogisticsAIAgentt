@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { mockPerformanceData } from '@/data/mockData';
 import { PerformanceData } from '@/types';
 
 const fetchPerformance = async (): Promise<PerformanceData> => {
-  await new Promise(r => setTimeout(r, 300));
-  return mockPerformanceData;
+  const res = await fetch('/api/performance');
+  if (!res.ok) throw new Error('Failed to fetch performance data');
+  return res.json();
 };
 
-export const usePerformance = () => useQuery({ queryKey: ['performance'], queryFn: fetchPerformance });
+export const usePerformance = () =>
+  useQuery({ queryKey: ['performance'], queryFn: fetchPerformance, refetchInterval: 30_000 });

@@ -21,6 +21,15 @@ export interface AgentAction {
   confidence: number;
 }
 
+export interface PipelineStep {
+  id: string;
+  agentName: string;
+  status: 'completed' | 'failed' | 'skipped';
+  input: Record<string, unknown>;
+  output: Record<string, unknown>;
+  summary: string;
+}
+
 export interface Order {
   id: string;
   title: string;
@@ -34,6 +43,7 @@ export interface Order {
   actions: AgentAction[];
   inputData: Record<string, unknown>;
   outputData: Record<string, unknown>;
+  pipelineSteps?: PipelineStep[];
 }
 
 export interface HumanReviewItem {

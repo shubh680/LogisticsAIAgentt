@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Brain, Zap, ArrowLeft } from 'lucide-react';
+import { Brain, Zap, ArrowLeft, GitBranch, CheckCircle2, XCircle, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -61,6 +61,59 @@ export function OrderDetailView({ order }: { order: Order }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pipeline Trace */}
+      {order.pipelineSteps && order.pipelineSteps.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GitBranch className="h-5 w-5 text-primary" /> Agent Pipeline Trace
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              {order.pipelineSteps.map((step, i) => {
+                const isLast = i === order.pipelineSteps!.length - 1;
+                const StatusIcon =
+                  step.status === 'completed' ? CheckCircle2 :
+                  step.status === 'failed' ? XCircle : SkipForward;
+                const iconColor =
+                  step.status === 'completed' ? 'text-green-500' :
+                  step.status === 'failed' ? 'text-destructive' : 'text-muted-foreground';
+                return (
+                  <div key={step.id} className="flex gap-4 mb-4">
+                    {/* Connector */}
+                    <div className="flex flex-col items-center">
+                      <StatusIcon className={`h-6 w-6 mt-1 shrink-0 ${iconColor}`} />
+                      {!isLast && <div className="w-px flex-1 bg-border mt-1" />}
+                    </div>
+                    {/* Content */}
+                    <div className={`flex-1 rounded-lg border p-4 mb-${isLast ? '0' : '0'}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-sm">{step.agentName}</span>
+                        <Badge variant={step.status === 'completed' ? 'default' : step.status === 'failed' ? 'destructive' : 'secondary'}>
+                          {step.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">{step.summary}</p>
+                      <div className="grid gap-2 md:grid-cols-2">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1 font-medium">Input</p>
+                          <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">{JSON.stringify(step.input, null, 2)}</pre>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1 font-medium">Output</p>
+                          <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">{JSON.stringify(step.output, null, 2)}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Thought Process */}
       <Card>

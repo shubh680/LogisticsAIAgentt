@@ -1,17 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import { mockOrders } from '@/data/mockData';
 import { Order } from '@/types';
 
 const fetchOrders = async (): Promise<Order[]> => {
-  // Replace with Firebase call: const snapshot = await getDocs(collection(db, 'orders'));
-  await new Promise(r => setTimeout(r, 300));
-  return mockOrders;
+  const res = await fetch('/api/shipments');
+  if (!res.ok) throw new Error('Failed to fetch shipments');
+  return res.json();
 };
 
 const fetchOrderById = async (id: string): Promise<Order | undefined> => {
-  await new Promise(r => setTimeout(r, 200));
-  return mockOrders.find(o => o.id === id);
+  const res = await fetch(`/api/shipments/${id}`);
+  if (res.status === 404) return undefined;
+  if (!res.ok) throw new Error('Failed to fetch shipment');
+  return res.json();
 };
 
-export const useOrders = () => useQuery({ queryKey: ['orders'], queryFn: fetchOrders });
-export const useOrder = (id: string) => useQuery({ queryKey: ['order', id], queryFn: () => fetchOrderById(id) });
+export const useOrders = () =>
+  useQuery({ queryKey: ['orders'], queryFn: fetchOrders, refetchInterval: 30_000 });
+export const useOrder = (id: string) =>
+  useQuery({ queryKey: ['order', id], queryFn: () => fetchOrderById(id), enabled: !!id });

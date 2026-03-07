@@ -1,0 +1,234 @@
+[
+  {
+    "query": "Find fastest route from Mumbai to Pune",
+    "query_type": "route_planning",
+    "tool_used": "routing_api",
+    "reasoning": [
+      "Set origin as Mumbai",
+      "Set destination as Pune",
+      "Select routing API",
+      "Request route planning data",
+      "Filter for fastest route",
+      "Return route details"
+    ],
+    "result": "Fastest route from Mumbai to Pune:\n  FASTEST ROUTE: via Expressway \u2014 ETA 3h 20m, 290 km\n  Alternative: via Highway       \u2014 ETA 4h 00m, 320 km\n  Traffic note: Minor delays near Mumbai outskirts, expressway clear.",
+    "evaluation": {
+      "answered": true,
+      "confidence": 1.0,
+      "reason": "The result directly provides the fastest route from Mumbai to Pune, including route options and estimated travel times."
+    },
+    "feedback": "positive",
+    "answered": true,
+    "confidence": 1.0,
+    "lesson": "For route_planning queries: When returning multiple routes, prioritize the route that is actually the fastest in terms of time, and provide clear information on how any traffic notes or delays may affect the ETA of that route.",
+    "gap": "The result returned multiple routes, but it didn't specify which one was the 'fastest' in terms of time, as the query asked for the 'fastest' route. The result also mentioned 'Minor delays near Mumbai outskirts' but didn't provide any information on how these delays would affect the ETA of the fastest route.",
+    "timestamp": "2026-03-07T23:14:18.544707+00:00",
+    "id": "57b25350"
+  },
+  {
+    "query": "Show all high-priority delayed shipments",
+    "query_type": "delay_status",
+    "tool_used": "firebase_query",
+    "reasoning": [
+      "Initialize Firebase Query tool",
+      "Set query type to 'delay_status'",
+      "Set priority filter to 'high'",
+      "Set status filter to 'delayed'",
+      "Execute Firebase Query",
+      "Retrieve and display results"
+    ],
+    "result": "{\n  \"matched_shipments\": 11,\n  \"results\": [\n    {\n      \"carrier\": \"Delhivery\",\n      \"distance_to_go_km\": 268,\n      \"last_checkpoint\": \"West Melissa Hub\",\n      \"planned_arrival\": \"2026-03-09 03:42:12.556357\",\n      \"shipment_id\": \"aF-04264702\",\n      \"shipment_priority\": \"High\",\n      \"shipment_value\": 10269,\n      \"traffic_density\": 0.75,\n      \"warehouse_load_pct\": 68,\n      \"weather\": \"Clear\",\n      \"is_delayed\": true\n    },\n    {\n      \"carrier\": \"BlueDart\",\n      \"distance_to_go_km\": 292,\n      \"last_checkpoint\": \"Rogersland Hub\",\n      \"planned_arrival\": \"2026-03-09 00:42:12.561000\",\n",
+    "evaluation": {
+      "answered": true,
+      "confidence": 1.0,
+      "reason": "The result directly shows all high-priority delayed shipments with relevant details."
+    },
+    "feedback": "negative",
+    "answered": true,
+    "confidence": 1.0,
+    "lesson": "For delay_status queries: Use the Firebase Query tool to filter results to only include shipments where 'shipment_priority' is 'High' and 'is_delayed' is true, and also ensure that the 'planned_arrival' date is in the future.",
+    "gap": "The result included shipments with 'shipment_priority' as 'High', but it did not filter out shipments that are not delayed. The result included a shipment with 'planned_arrival' as '2026-03-09 00:42:12.561000' which is before the current date, indicating it is not delayed.",
+    "timestamp": "2026-03-07T23:14:22.041480+00:00",
+    "id": "432b6382"
+  },
+  {
+    "query": "What is the delay status of shipment MY-87254221",
+    "query_type": "delay_status",
+    "tool_used": "firebase_query",
+    "reasoning": [
+      "Set Firebase Query tool as the selected tool",
+      "Filter results to include only shipments where 'shipment_priority' is 'High'",
+      "Filter results to include only shipments where 'is_delayed' is true",
+      "Filter results to include only shipments where 'planned_arrival' date is in the future",
+      "Query shipment MY-87254221 using the filtered criteria",
+      "Retrieve delay status of shipment MY-87254221"
+    ],
+    "result": "Shipment 'MY-87254221' not found in Firebase.",
+    "evaluation": {
+      "answered": false,
+      "confidence": 1.0,
+      "reason": "The result does not contain any relevant shipment data or delay status information."
+    },
+    "feedback": "positive",
+    "answered": false,
+    "confidence": 1.0,
+    "lesson": "For delay_status queries: Use the Firebase Query tool to filter results to only include shipments where 'shipment_priority' is 'High' and 'is_delayed' is true, and also ensure that the 'planned_arrival' date is in the future, by adding the following filters: .where('shipment_priority', '==', 'High').where('is_delayed', '==', true).where('planned_arrival', '>=', Firebase.firestore.FieldValue.serverTimestamp())",
+    "gap": "The result did not filter to only include shipments where 'shipment_priority' is 'High' and 'is_delayed' is true, and also ensure that the 'planned_arrival' date is in the future. The result simply stated that the shipment was not found, which does not directly answer the query.",
+    "timestamp": "2026-03-07T23:14:25.597285+00:00",
+    "id": "2c40a899"
+  },
+  {
+    "query": "Route from Delhi to Jaipur",
+    "query_type": "route_planning",
+    "tool_used": "routing_api",
+    "reasoning": [
+      "Initiate routing_api tool for route_planning query",
+      "Set origin to Delhi and destination to Jaipur",
+      "Request multiple routes from routing_api",
+      "Filter routes based on distance and time to prioritize the fastest route",
+      "Analyze traffic notes and delays for the selected route",
+      "Calculate estimated time of arrival (ETA) considering traffic notes and delays",
+      "Provide clear information on traffic notes and delays affecting the ETA",
+      "Return the fastest route with traffic notes and ETA"
+    ],
+    "result": "Fastest route from Delhi to Jaipur:\n  FASTEST ROUTE: via Expressway \u2014 ETA 3h 20m, 290 km\n  Alternative: via Highway       \u2014 ETA 4h 00m, 320 km\n  Traffic note: Minor delays near Delhi outskirts, expressway clear.",
+    "evaluation": {
+      "answered": true,
+      "confidence": 1.0,
+      "reason": "The result directly provides the fastest and alternative routes from Delhi to Jaipur along with estimated times and traffic notes."
+    },
+    "feedback": "positive",
+    "answered": true,
+    "confidence": 1.0,
+    "lesson": "For route_planning queries: When returning multiple routes, prioritize the route that is actually the fastest in terms of time, and provide clear information on how any traffic notes or delays may affect the ETA of that route. Ensure that the 'fastest' route is indeed the fastest, and provide a clear explanation of any factors that may affect the ETA.",
+    "gap": "The result did not directly answer the query as it provided two routes, but the query only asked for the 'fastest' route. The alternative route provided may not be the fastest in terms of time, and the traffic note may affect the ETA of the fastest route.",
+    "timestamp": "2026-03-07T23:14:28.419105+00:00",
+    "id": "6350329b"
+  },
+  {
+    "query": "Which carrier has the highest reliability",
+    "query_type": "carrier_analysis",
+    "tool_used": "firebase_query",
+    "reasoning": [
+      "{'step': 'Connect to Firebase database', 'tool': 'firebase_query'}",
+      "{'step': 'Query carrier reliability data', 'query_type': 'carrier_analysis'}",
+      "{'step': 'Sort data by reliability in descending order', 'sort_by': 'reliability'}",
+      "{'step': 'Select the top carrier with the highest reliability', 'select_top': '1'}",
+      "{'step': \"Return the selected carrier's name and reliability score\"}"
+    ],
+    "result": "{\n  \"carrier_reliability\": {\n    \"BlueDart\": 0.75,\n    \"Swift\": 0.824,\n    \"Delhivery\": 0.735\n  },\n  \"most_reliable_carrier\": \"Swift\",\n  \"reliability_score\": 0.824,\n  \"total_shipments_analysed\": 100\n}",
+    "evaluation": {
+      "answered": true,
+      "confidence": 1.0,
+      "reason": "The result directly identifies the most reliable carrier as 'Swift' with a reliability score of 0.824."
+    },
+    "feedback": "neutral",
+    "answered": true,
+    "confidence": 1.0,
+    "lesson": "For carrier_analysis queries: When the query asks for a singular answer, return only the carrier with the highest reliability score, without including the list of carriers or additional information such as total shipments analyzed.",
+    "gap": "The result returned the most reliable carrier, but it did not directly answer the query 'Which carrier has the highest reliability'. The query asked for a singular answer, but the result returned a list of carriers with their reliability scores, along with the most reliable carrier. The result also included additional information such as total shipments analyzed, which is not directly relevant to the query.",
+    "timestamp": "2026-03-07T23:14:31.720197+00:00",
+    "id": "bf487ad5"
+  },
+  {
+    "query": "Show all high-priority delayed shipments",
+    "query_type": "delay_status",
+    "tool_used": "routing_api",
+    "reasoning": [
+      "Select the Firebase Query tool for the delay_status query",
+      "Filter results to include only shipments where 'shipment_priority' is 'High'",
+      "Filter results to include only shipments where 'is_delayed' is true",
+      "Filter results to include only shipments where 'planned_arrival' date is in the future",
+      "Apply the following filters: .where('shipment_priority', '==', 'High').where('is_delayed', '==', true).where('planned_arrival', '>=', Firebase.firestore.FieldValue.serverTimestamp())",
+      "Use the routing_api tool to execute the query"
+    ],
+    "result": "Routing API: could not identify city names. Please use format: 'route from <City A> to <City B>'.",
+    "evaluation": {
+      "answered": false,
+      "confidence": 0.0,
+      "reason": "The result does not contain any relevant shipment data or information about delayed shipments."
+    },
+    "feedback": "positive",
+    "answered": false,
+    "confidence": 0.0,
+    "lesson": "For delay_status queries: Use the Firebase Query tool to filter results to only include shipments where 'shipment_priority' is 'High', 'is_delayed' is true, and 'planned_arrival' date is in the future, by adding the following filters: .where('shipment_priority', '==', 'High').where('is_delayed', '==', true).where('planned_arrival', '>=', Firebase.firestore.FieldValue.serverTimestamp())",
+    "gap": "The result did not filter to only high-priority delayed shipments. It also did not check if the 'planned_arrival' date is in the future. The error message returned was unrelated to the query.",
+    "timestamp": "2026-03-07T23:14:36.422679+00:00",
+    "id": "6c278b3b"
+  },
+  {
+    "query": "List urgent shipments that are late",
+    "query_type": "delay_status",
+    "tool_used": "routing_api",
+    "reasoning": [
+      "Select the Firebase Query tool",
+      "Filter results to include only shipments where 'shipment_priority' is 'High'",
+      "Filter results to include only shipments where 'is_delayed' is true",
+      "Filter results to include only shipments where 'planned_arrival' date is in the future",
+      "Use the following filters: .where('shipment_priority', '==', 'High').where('is_delayed', '==', true).where('planned_arrival', '>=', Firebase.firestore.FieldValue.serverTimestamp())"
+    ],
+    "result": "Routing API: could not identify city names. Please use format: 'route from <City A> to <City B>'.",
+    "evaluation": {
+      "answered": false,
+      "confidence": 0.0,
+      "reason": "The result does not provide any information about urgent shipments that are late, instead it provides an error message about routing API city name format."
+    },
+    "feedback": "positive",
+    "answered": false,
+    "confidence": 0.0,
+    "lesson": "For delay_status queries: tool 'routing_api' works well, keep using it.",
+    "gap": "Result looks acceptable.",
+    "timestamp": "2026-03-07T23:14:54.401330+00:00",
+    "id": "0d5b91b9"
+  },
+  {
+    "query": "Fastest route from Chennai to Bangalore",
+    "query_type": "route_planning",
+    "tool_used": "routing_api",
+    "reasoning": [
+      "Query routing_api for routes from Chennai to Bangalore",
+      "Filter results to prioritize routes based on estimated time of arrival (ETA)",
+      "Check for any traffic notes or delays that may affect the ETA of the top-priority route",
+      "Verify that the top-priority route is indeed the fastest by comparing ETAs with other routes",
+      "Provide clear information on how any traffic notes or delays may affect the ETA of the top-priority route",
+      "Return the top-priority route as the fastest route from Chennai to Bangalore"
+    ],
+    "result": "Fastest route from Chennai to Bangalore:\n  FASTEST ROUTE: via Expressway \u2014 ETA 3h 20m, 290 km\n  Alternative: via Highway       \u2014 ETA 4h 00m, 320 km\n  Traffic note: Minor delays near Chennai outskirts, expressway clear.",
+    "evaluation": {
+      "answered": true,
+      "confidence": 1.0,
+      "reason": "The result directly provides the fastest routes and ETAs from Chennai to Bangalore, along with relevant traffic information."
+    },
+    "feedback": "positive",
+    "answered": true,
+    "confidence": 1.0,
+    "lesson": "For route_planning queries: tool 'routing_api' works well, keep using it.",
+    "gap": "Result looks acceptable.",
+    "timestamp": "2026-03-07T23:15:06.131573+00:00",
+    "id": "b4b77168"
+  },
+  {
+    "query": "Which carrier is most reliable this week",
+    "query_type": "carrier_analysis",
+    "tool_used": "firebase_query",
+    "reasoning": [
+      "{'step': 'Fetch carrier reliability data from Firebase database', 'tool': 'firebase_query'}",
+      "{'step': \"Filter data to only include this week's reliability scores\", 'tool': 'firebase_query'}",
+      "{'step': 'Apply LESSON: For carrier_analysis queries, return only the carrier with the highest reliability score', 'tool': 'logic'}",
+      "{'step': \"Return the most reliable carrier's name and its reliability score\", 'tool': 'logic'}"
+    ],
+    "result": "{\n  \"carrier_reliability\": {\n    \"BlueDart\": 0.75,\n    \"Swift\": 0.824,\n    \"Delhivery\": 0.735\n  },\n  \"most_reliable_carrier\": \"Swift\",\n  \"reliability_score\": 0.824,\n  \"total_shipments_analysed\": 100\n}",
+    "evaluation": {
+      "answered": true,
+      "confidence": 1.0,
+      "reason": "The result directly identifies the most reliable carrier for this week as 'Swift'."
+    },
+    "feedback": "neutral",
+    "answered": true,
+    "confidence": 1.0,
+    "lesson": "For carrier_analysis queries: When the query asks for a singular answer, return only the carrier with the highest reliability score, without including the list of carriers or additional information such as total shipments analyzed. Update the firebase_query tool to filter out unnecessary data and return only the required fields.",
+    "gap": "The result returned a list of carriers with their reliability scores, but the query asked for 'the most reliable carrier'. The result also included additional information such as total shipments analyzed, which is not relevant to the query.",
+    "timestamp": "2026-03-07T23:15:13.355154+00:00",
+    "id": "4ea8cd74"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "route_planning::routing_api": {
+    "calls": 3,
+    "successes": 3,
+    "rate": 1.0
+  },
+  "delay_status::firebase_query": {
+    "calls": 2,
+    "successes": 0,
+    "rate": 0.0
+  },
+  "carrier_analysis::firebase_query": {
+    "calls": 2,
+    "successes": 2,
+    "rate": 1.0
+  },
+  "delay_status::routing_api": {
+    "calls": 2,
+    "successes": 0,
+    "rate": 0.0
+  }
+}

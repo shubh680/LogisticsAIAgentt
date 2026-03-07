@@ -1,0 +1,275 @@
+import os
+import json
+from dotenv import load_dotenv
+from groq import Groq
+from .firebase_client import FirebaseManager
+
+load_dotenv()
+
+MODEL = "llama-3.3-70b-versatile"
+
+SYSTEM_PROMPT = (
+    "You are the Ingestion & Observation Agent in a multi-agent logistics AI system. "
+    "Your sole responsibility is to fetch live shipment data from Firebase using your tools "
+    "and then produce a concise, structured observation of the current logistics state. "
+    "When asked to observe, you MUST: "
+    "1. Call fetch_live_data to load the data. "
+    "2. Call get_summary_stats for an overview. "
+    "3. Call get_delayed to identify delayed shipments. "
+    "4. Call get_high_priority to identify urgent shipments. "
+    "5. Return a JSON object with keys: summary, total_shipments, delayed_shipments, "
+    "high_priority_shipments, alerts, and observations. "
+    "alerts is a list of shipment_ids that are both delayed AND high priority. "
+    "observations is a list of short insight strings about the current data. "
+    "Always ground every field in the actual data returned by the tools. "
+    "For ad-hoc queries, use whichever tools are relevant and respond in plain text."
+)
+
+
+class IngestionAgent:
+    """
+    Observation agent in a multi-agent logistics AI system.
+    Fetches live shipment data from Firebase Realtime Database using Groq
+    tool-calling and produces structured observations for downstream agents.
+    """
+
+    def __init__(self, live_collection: str = "live_shipments"):
+        self.db = FirebaseManager(live_collection)
+        self._live_data: list[dict] = []
+        self._client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self._tools, self._tool_map = self._build_tools()
+
+
+    def fetch_live(self) -> list[dict]:
+        """Fetch all records from the live shipments ."""
+        self._live_data = self.db.fetch_live()
+        return self._live_data
+
+    def ingest(self) -> dict:
+        """Pull live shipments from Firebase and cache them locally."""
+        self._live_data = self.db.fetch_live()
+        return {"live_count": len(self._live_data)}
+
+
+    def get_shipment(self, shipment_id: str) -> dict | None:
+        """Look up a single shipment by ID."""
+        for row in self._live_data:
+            if row.get("shipment_id") == shipment_id:
+                return row
+        return None
+
+    def get_delayed_shipments(self) -> list[dict]:
+        """Return all shipments currently flagged as delayed."""
+        return [row for row in self._live_data if row.get("is_delayed")]
+
+    def get_high_priority_shipments(self) -> list[dict]:
+        """Return all high-priority shipments."""
+        return [
+            row for row in self._live_data if row.get("shipment_priority") == "High"
+        ]
+
+    def _build_tools(self) -> tuple[list[dict], dict]:
+        """Return Groq-compatible tool schemas and a dispatch map."""
+
+        def _ensure_live():
+            if not self._live_data:
+                self.fetch_live()
+
+        def fetch_live_data() -> str:
+            result = self.ingest()
+            return json.dumps(result)
+
+        def get_live_shipments() -> str:
+            _ensure_live()
+            return json.dumps(self._live_data, default=str)
+
+        def lookup_shipment(shipment_id: str) -> str:
+            _ensure_live()
+            row = self.get_shipment(shipment_id)
+            if row is None:
+                return f"No shipment found with ID '{shipment_id}'."
+            return json.dumps(row, default=str)
+
+        def get_delayed() -> str:
+            _ensure_live()
+            return json.dumps(self.get_delayed_shipments(), default=str)
+
+        def get_high_priority() -> str:
+            _ensure_live()
+            return json.dumps(self.get_high_priority_shipments(), default=str)
+
+        def get_summary_stats() -> str:
+            _ensure_live()
+            rows = self._live_data
+            if not rows:
+                return "No live shipment data available."
+            delayed = [r for r in rows if r.get("is_delayed")]
+            carriers: dict = {}
+            for r in rows:
+                c = r.get("carrier", "Unknown")
+                carriers[c] = carriers.get(c, 0) + 1
+            return json.dumps(
+                {
+                    "total_shipments": len(rows),
+                    "delayed_shipments": len(delayed),
+                    "delay_rate": round(len(delayed) / len(rows), 3),
+                    "carrier_distribution": carriers,
+                },
+                default=str,
+            )
+
+        tool_schemas = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "fetch_live_data",
+                    "description": "Fetch / refresh live shipment data from Firebase and return the count.",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_live_shipments",
+                    "description": "Return all current live shipments.",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "lookup_shipment",
+                    "description": "Look up a specific shipment by its ID.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "shipment_id": {
+                                "type": "string",
+                                "description": "The shipment ID to look up.",
+                            }
+                        },
+                        "required": ["shipment_id"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_delayed",
+                    "description": "Return all shipments that are currently delayed.",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_high_priority",
+                    "description": "Return all high-priority shipments.",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_summary_stats",
+                    "description": "Return summary statistics of the live shipments.",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+        ]
+
+        tool_map = {
+            "fetch_live_data": fetch_live_data,
+            "get_live_shipments": get_live_shipments,
+            "lookup_shipment": lookup_shipment,
+            "get_delayed": get_delayed,
+            "get_high_priority": get_high_priority,
+            "get_summary_stats": get_summary_stats,
+        }
+
+        return tool_schemas, tool_map
+
+    def observe(self) -> dict:
+        """
+        Primary agent entrypoint for multi-agent pipelines.
+        Autonomously fetches all live data, analyzes it, and returns a
+        structured observation dict for downstream agents to act on.
+        """
+        observation_prompt = (
+            "Observe the current state of live shipments. "
+            "Fetch the data, analyze it fully, and return your observation "
+            "as a valid JSON object with keys: "
+            "summary, total_shipments, delayed_shipments, high_priority_shipments, "
+            "alerts, and observations. "
+            "Return ONLY the JSON object, no extra text."
+        )
+        raw = self.run(observation_prompt)
+        # Strip markdown code fences if the model wraps the JSON
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        try:
+            return json.loads(raw.strip())
+        except json.JSONDecodeError:
+            return {"raw_observation": raw}
+
+    def run(self, query: str, chat_history: list | None = None) -> str:
+        """Send a natural-language query to the agent using Groq tool-calling."""
+        messages = (
+            [{"role": "system", "content": SYSTEM_PROMPT}]
+            + (chat_history or [])
+            + [{"role": "user", "content": query}]
+        )
+
+        while True:
+            response = self._client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                tools=self._tools,
+                tool_choice="auto",
+                temperature=0,
+            )
+            msg = response.choices[0].message
+
+            if not msg.tool_calls:
+                return msg.content
+
+            # Serialize assistant message to a plain dict (SDK objects are not JSON-serializable)
+            messages.append(
+                {
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments,
+                            },
+                        }
+                        for tc in msg.tool_calls
+                    ],
+                }
+            )
+
+            # Execute each tool call and append results
+            for tc in msg.tool_calls:
+                fn_name = tc.function.name
+                fn_args = json.loads(tc.function.arguments or "{}")
+                fn = self._tool_map.get(fn_name)
+                result = fn(**fn_args) if fn else f"Unknown tool: {fn_name}"
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "content": result,
+                    }
+                )
+
+
+if __name__ == "__main__":
+    agent = IngestionAgent()
+    observation = agent.observe()
+    print(json.dumps(observation, indent=2))

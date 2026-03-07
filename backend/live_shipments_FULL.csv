@@ -1,0 +1,101 @@
+shipment_id,carrier,weather,shipment_value,warehouse_load_pct,traffic_density,planned_arrival,current_delay_minutes,is_delayed,event_type,last_checkpoint,distance_to_go_km,shipment_priority
+MY-87254221,BlueDart,Clear,9409,100,0.25,2026-03-09 11:42:12.556357,5,0,Routine,New Brandichester Hub,220,High
+am-86301020,BlueDart,Cyclone,8301,67,0.17,2026-03-08 09:42:12.556357,681,1,Natural Disaster,Karenchester Hub,354,Low
+Sa-85905834,Swift,Clear,9371,88,0.98,2026-03-09 03:42:12.556357,106,1,Operational Bottleneck,Davisport Hub,259,Medium
+EX-57532700,Delhivery,Fog,1395,94,0.33,2026-03-09 18:42:12.556357,0,0,Routine,Nicolasland Hub,457,Medium
+Sa-74553568,BlueDart,Clear,7653,85,0.34,2026-03-09 15:42:12.556357,15,0,Routine,Port Keithborough Hub,165,Low
+DQ-58379291,BlueDart,Clear,11806,30,0.92,2026-03-08 06:42:12.556357,105,1,Operational Bottleneck,New Christinaside Hub,56,High
+ha-42334868,BlueDart,Fog,2031,50,0.23,2026-03-08 02:42:12.556357,7,0,Routine,Rayfort Hub,384,Low
+nq-67047842,BlueDart,Heavy Rain,7473,98,0.96,2026-03-08 18:42:12.556357,1,0,Routine,Frankbury Hub,190,Medium
+ab-48197409,Swift,Fog,8817,71,0.9,2026-03-09 21:42:12.556357,94,1,Operational Bottleneck,Lake Kevinbury Hub,151,Low
+Ez-86702425,Swift,Clear,11848,88,0.1,2026-03-09 17:42:12.556357,97,1,Operational Bottleneck,Troyfort Hub,13,High
+vV-13704879,Swift,Fog,9302,75,0.44,2026-03-08 01:42:12.556357,2,0,Routine,New Joshua Hub,457,Medium
+Ry-27792130,Delhivery,Fog,13434,79,0.13,2026-03-09 01:42:12.556357,4,0,Routine,East Emilytown Hub,217,Low
+pu-15041726,Delhivery,Clear,1045,71,0.19,2026-03-09 03:42:12.556357,0,0,Routine,Smithtown Hub,218,Low
+sm-25691078,BlueDart,Heavy Rain,3965,97,0.14,2026-03-09 06:42:12.556357,154,1,Operational Bottleneck,Lake Jeffreyshire Hub,406,Low
+aF-04264702,Delhivery,Clear,10269,68,0.75,2026-03-09 03:42:12.556357,5,0,Routine,West Melissa Hub,268,High
+Mi-94056894,BlueDart,Clear,8092,47,0.31,2026-03-08 11:42:12.561000,7,0,Routine,Lake Williamport Hub,262,Low
+GH-09918794,Swift,Clear,10407,86,0.38,2026-03-08 09:42:12.561000,7,0,Routine,Ryanside Hub,481,Medium
+kn-76280706,BlueDart,Clear,4645,41,0.18,2026-03-08 18:42:12.561000,121,1,Operational Bottleneck,Susanstad Hub,414,Medium
+hM-85333838,Swift,Clear,770,33,0.31,2026-03-08 05:42:12.561000,13,0,Routine,South Jessica Hub,429,Medium
+FL-25640435,Swift,Clear,5834,47,0.33,2026-03-08 09:42:12.561000,14,0,Routine,South Mirandachester Hub,253,High
+Vt-85166559,Swift,Clear,13280,68,0.78,2026-03-08 06:42:12.561000,0,0,Routine,Torresborough Hub,277,Medium
+Hb-73137187,BlueDart,Clear,5519,31,0.87,2026-03-09 00:42:12.561000,8,0,Routine,Rogersland Hub,292,High
+CY-63895374,BlueDart,Heavy Rain,14213,91,0.77,2026-03-09 03:42:12.561000,120,1,Operational Bottleneck,Andreafurt Hub,337,Low
+Og-02097784,Delhivery,Clear,12785,51,0.61,2026-03-09 00:42:12.561000,7,0,Routine,Lake Brittanyhaven Hub,277,Medium
+Yw-26735946,Swift,Clear,3426,38,0.52,2026-03-08 12:42:12.563105,7,0,Routine,Haroldmouth Hub,91,Medium
+Mz-95574277,BlueDart,Heavy Rain,12918,95,0.85,2026-03-08 02:42:12.563105,158,1,Operational Bottleneck,East Emilyside Hub,213,Low
+fN-59373092,Delhivery,Clear,879,88,0.21,2026-03-09 05:42:12.563105,91,1,Operational Bottleneck,Aprilshire Hub,354,High
+uk-47556138,Delhivery,Clear,7082,81,0.63,2026-03-09 10:42:12.563105,15,0,Routine,Woodtown Hub,379,Medium
+nP-20441118,Swift,Clear,4574,65,0.34,2026-03-09 20:42:12.563105,0,0,Routine,Olsonchester Hub,29,Medium
+zx-34881552,Delhivery,Clear,9868,87,0.53,2026-03-08 02:42:12.563105,14,0,Routine,South Markburgh Hub,149,Medium
+Ti-55859662,Swift,Clear,7621,66,0.99,2026-03-08 22:42:12.563105,7,0,Routine,East Justinburgh Hub,406,High
+dM-39432487,BlueDart,Clear,8238,92,0.96,2026-03-09 18:42:12.563105,127,1,Operational Bottleneck,Penahaven Hub,99,Low
+sU-59638083,BlueDart,Cyclone,11159,87,0.4,2026-03-09 15:42:12.563105,667,1,Natural Disaster,West Amy Hub,426,High
+Df-24639825,BlueDart,Heavy Rain,4231,74,0.17,2026-03-08 12:42:12.564858,89,1,Operational Bottleneck,North Courtneybury Hub,462,Low
+WW-86193647,BlueDart,Clear,7870,86,0.17,2026-03-08 20:42:12.564858,4,0,Routine,Lake George Hub,136,Medium
+kR-52280260,Delhivery,Clear,1973,34,0.48,2026-03-09 12:42:12.564858,10,0,Routine,Cheryltown Hub,65,High
+bt-02426243,BlueDart,Heavy Rain,8265,69,0.72,2026-03-08 06:42:12.564858,110,1,Operational Bottleneck,New Jean Hub,299,Medium
+lU-85712071,Swift,Fog,2099,54,0.49,2026-03-09 09:42:12.564858,12,0,Routine,Howellfort Hub,449,Low
+ui-84760077,BlueDart,Heavy Rain,14739,36,0.51,2026-03-09 19:42:12.564858,143,1,Operational Bottleneck,Shannonstad Hub,335,High
+vB-16173067,BlueDart,Fog,8070,37,0.2,2026-03-08 01:42:12.564858,4,0,Routine,Port Carrie Hub,475,Medium
+lg-28117360,Delhivery,Fog,743,72,0.23,2026-03-08 18:42:12.564858,150,1,Operational Bottleneck,Jacquelineside Hub,207,Medium
+HN-28745776,Delhivery,Clear,2551,40,0.63,2026-03-08 13:42:12.564858,11,0,Routine,Danielsfurt Hub,472,High
+iI-50990387,Swift,Fog,2634,53,0.21,2026-03-08 02:42:12.564858,2,0,Routine,Christineborough Hub,42,Medium
+pl-40924200,Delhivery,Heavy Rain,8843,36,0.31,2026-03-08 01:42:12.564858,11,0,Routine,New Billymouth Hub,166,Medium
+wi-74351236,Delhivery,Clear,12752,81,0.77,2026-03-08 09:42:12.564858,8,0,Routine,North Tyler Hub,98,Low
+vU-04229547,BlueDart,Clear,14906,94,0.59,2026-03-08 13:42:12.564858,13,0,Routine,East Bradleystad Hub,456,Low
+NR-56956491,Swift,Heavy Rain,4415,99,0.32,2026-03-08 20:42:12.564858,12,0,Routine,Baxterstad Hub,195,Medium
+Ir-48620121,Delhivery,Heavy Rain,7503,78,0.2,2026-03-09 15:42:12.564858,0,0,Routine,Jadebury Hub,123,Low
+iO-79037189,Swift,Heavy Rain,12970,56,0.57,2026-03-08 09:42:12.564858,13,0,Routine,Bethanyhaven Hub,363,High
+SI-00904967,Swift,Clear,6554,99,0.23,2026-03-08 15:42:12.564858,0,0,Routine,Port Charlesborough Hub,253,Medium
+IS-45286619,Delhivery,Clear,9587,40,0.5,2026-03-08 11:42:12.564858,5,0,Routine,Debraview Hub,178,Low
+Oq-75016538,Swift,Clear,8748,73,0.75,2026-03-09 00:42:12.564858,11,0,Routine,Port Steven Hub,231,High
+fT-93762253,Swift,Clear,5114,62,0.36,2026-03-08 13:42:12.564858,9,0,Routine,Porterbury Hub,131,Medium
+dW-29778174,BlueDart,Fog,8423,97,0.87,2026-03-08 14:42:12.564858,7,0,Routine,Charlesburgh Hub,192,Medium
+CX-62132848,Delhivery,Clear,11664,90,0.74,2026-03-08 19:42:12.564858,8,0,Routine,Ashleyland Hub,419,Low
+of-36371150,Swift,Clear,2540,42,0.1,2026-03-08 01:42:12.564858,7,0,Routine,South Elizabeth Hub,62,Low
+yy-20407432,Swift,Clear,2819,83,0.2,2026-03-08 20:42:12.564858,13,0,Routine,West Hectorfurt Hub,357,High
+QK-40159835,Swift,Clear,4121,80,0.85,2026-03-09 04:42:12.564858,3,0,Routine,West Russell Hub,67,High
+Ns-86336041,Delhivery,Clear,3607,71,0.86,2026-03-09 09:42:12.564858,6,0,Routine,Port Jasonhaven Hub,444,High
+SQ-72147190,BlueDart,Clear,8429,99,0.48,2026-03-08 02:42:12.564858,157,1,Operational Bottleneck,Port Robertside Hub,363,High
+JR-80820397,Delhivery,Clear,10318,63,0.4,2026-03-08 14:42:12.564858,4,0,Routine,Humphreymouth Hub,41,Medium
+VE-16409696,Swift,Heavy Rain,7116,74,0.4,2026-03-08 05:42:12.564858,7,0,Routine,Arroyoborough Hub,116,High
+Ml-61288880,BlueDart,Clear,12887,43,0.75,2026-03-09 12:42:12.564858,11,0,Routine,Joseton Hub,458,Low
+vD-28729573,BlueDart,Heavy Rain,5816,85,0.28,2026-03-08 17:42:12.564858,64,1,Operational Bottleneck,Port Stacy Hub,222,Low
+nH-12067829,Swift,Clear,10695,93,0.44,2026-03-09 08:42:12.564858,0,0,Routine,North Gerald Hub,66,High
+on-37882231,BlueDart,Clear,10056,61,0.71,2026-03-09 09:42:12.564858,15,0,Routine,Lake Dean Hub,486,High
+Hk-36149413,Delhivery,Clear,5796,47,0.3,2026-03-08 07:42:12.564858,12,0,Routine,Port Krystal Hub,368,Medium
+Hs-65315817,BlueDart,Cyclone,4689,98,0.38,2026-03-08 11:42:12.564858,719,1,Natural Disaster,Port Kelly Hub,35,Low
+IE-59366590,Delhivery,Heavy Rain,5131,54,0.15,2026-03-08 10:42:12.564858,4,0,Routine,Jacksonmouth Hub,20,Low
+IQ-32929830,Swift,Clear,8179,56,0.72,2026-03-08 20:42:12.564858,9,0,Routine,Lake Clayton Hub,477,Medium
+YP-37727425,Swift,Heavy Rain,6207,83,0.43,2026-03-09 15:42:12.571143,1,0,Routine,Jessicastad Hub,390,Medium
+OY-76995077,BlueDart,Heavy Rain,8962,74,0.3,2026-03-09 07:42:12.571143,169,1,Operational Bottleneck,Lopezfurt Hub,356,Medium
+bo-79523623,Delhivery,Clear,12463,32,0.27,2026-03-08 05:42:12.571143,7,0,Routine,Duranstad Hub,163,Low
+XV-48662655,Delhivery,Heavy Rain,14825,58,0.19,2026-03-09 21:42:12.571143,9,0,Routine,Kimside Hub,442,High
+uh-37085458,Delhivery,Heavy Rain,8449,56,0.76,2026-03-08 19:42:12.571143,13,0,Routine,Port Victoria Hub,39,High
+Bk-59584054,Delhivery,Clear,6150,89,0.76,2026-03-09 00:42:12.571143,173,1,Operational Bottleneck,West Beth Hub,190,High
+fc-60380298,Delhivery,Clear,1443,69,0.59,2026-03-09 11:42:12.571143,9,0,Routine,Jenniferview Hub,270,Medium
+iD-70719167,BlueDart,Fog,5868,50,0.89,2026-03-09 13:42:12.571143,3,0,Routine,Staffordburgh Hub,327,Medium
+wo-46256459,Delhivery,Cyclone,4214,48,0.96,2026-03-08 17:42:12.571143,511,1,Natural Disaster,North Adrianberg Hub,366,Medium
+xB-71478003,Delhivery,Heavy Rain,14525,48,0.37,2026-03-08 08:42:12.571143,4,0,Routine,Angelicaport Hub,403,Low
+VC-74178643,BlueDart,Clear,11399,76,0.53,2026-03-09 12:42:12.571143,15,0,Routine,Wardland Hub,261,Low
+Nq-27315469,Swift,Clear,8493,37,0.86,2026-03-08 04:42:12.573054,11,0,Routine,North Marc Hub,162,Low
+ic-25458895,BlueDart,Clear,6423,33,0.2,2026-03-08 15:42:12.573054,8,0,Routine,Riosshire Hub,183,High
+oN-69056499,Delhivery,Clear,12300,62,0.86,2026-03-09 20:42:12.573467,8,0,Routine,West James Hub,221,High
+be-56296155,Delhivery,Cyclone,7969,35,0.36,2026-03-09 01:42:12.573467,533,1,Natural Disaster,Robertshire Hub,396,High
+EQ-49822715,Swift,Fog,1146,66,0.22,2026-03-09 12:42:12.573467,9,0,Routine,North Stephanie Hub,144,Low
+Gk-68662949,Delhivery,Clear,10949,60,0.51,2026-03-09 08:42:12.573467,11,0,Routine,West Brenda Hub,436,Low
+kk-66589925,Swift,Clear,13988,48,0.58,2026-03-09 15:42:12.573467,12,0,Routine,Clarkburgh Hub,355,High
+Ds-94419588,Swift,Clear,13484,54,0.42,2026-03-08 18:42:12.573467,13,0,Routine,North Jill Hub,342,High
+pd-26365277,Delhivery,Clear,3574,93,0.98,2026-03-09 02:42:12.573467,7,0,Routine,Lake Mary Hub,417,High
+Qn-81042330,Swift,Fog,11668,48,0.13,2026-03-09 06:42:12.573467,15,0,Routine,West Michael Hub,155,Low
+IF-34341489,Delhivery,Heavy Rain,4480,75,0.51,2026-03-08 09:42:12.573467,11,0,Routine,South Lisaburgh Hub,145,High
+Kc-01058661,BlueDart,Cyclone,12067,41,0.23,2026-03-09 02:42:12.573467,580,1,Natural Disaster,New Kristinport Hub,277,Low
+Ai-88959065,Delhivery,Fog,7575,89,0.44,2026-03-08 11:42:12.573467,14,0,Routine,Cooperview Hub,469,High
+tY-55540627,Swift,Clear,7022,30,0.2,2026-03-08 23:42:12.573467,10,0,Routine,Andrewshire Hub,245,Low
+zQ-80739169,BlueDart,Heavy Rain,14991,54,0.77,2026-03-08 11:42:12.573467,139,1,Operational Bottleneck,East Michaelfurt Hub,414,High
+kK-47002156,Swift,Clear,7517,98,0.67,2026-03-09 14:42:12.573467,96,1,Operational Bottleneck,Lake Veronicaport Hub,107,Medium
+wR-77222638,Delhivery,Clear,5282,74,0.27,2026-03-08 17:42:12.573467,0,0,Routine,New Maryland Hub,358,Low
+RH-59895735,Swift,Fog,14311,42,0.13,2026-03-09 09:42:12.573467,1,0,Routine,Adamsville Hub,188,High
+Lh-79853556,Swift,Heavy Rain,14756,93,0.79,2026-03-08 14:42:12.573467,4,0,Routine,Janetmouth Hub,352,High

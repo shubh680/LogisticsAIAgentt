@@ -46,6 +46,22 @@ export interface Order {
   pipelineSteps?: PipelineStep[];
 }
 
+export interface ShipmentDetails {
+  carrier?: string;
+  weather?: string;
+  priority?: string;
+  isDelayed?: boolean;
+  etaHours?: number;
+  warehouseLoad?: number;
+  trafficDelay?: number;
+  delayProbability?: number;
+  riskLevel?: string;
+  riskScore?: number;
+  rootCauses?: string[];
+  recommendedAction?: string;
+  triggeredRules?: string[];
+}
+
 export interface HumanReviewItem {
   id: string;
   orderId: string;
@@ -57,6 +73,7 @@ export interface HumanReviewItem {
   createdAt: string;
   reviewedAt?: string;
   reviewedBy?: string;
+  shipmentDetails?: ShipmentDetails;
 }
 
 export interface PerformanceData {

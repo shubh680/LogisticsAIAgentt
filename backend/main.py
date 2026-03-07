@@ -423,6 +423,10 @@ def _assessment_to_review(assessment: dict) -> dict | None:
         "confidence": confidence,
     }
 
+    delay_prob = assessment.get("ml_delay_probability") or assessment.get("delay_probability")
+    warehouse_load = assessment.get("warehouse_load")
+    traffic_delay = assessment.get("traffic_delay")
+
     return {
         "id": review_id,
         "orderId": shipment_id,
@@ -434,6 +438,21 @@ def _assessment_to_review(assessment: dict) -> dict | None:
         "createdAt": now,
         "reviewedAt": stored.get("reviewedAt"),
         "reviewedBy": stored.get("reviewedBy"),
+        "shipmentDetails": {
+            "carrier": assessment.get("carrier"),
+            "weather": assessment.get("weather"),
+            "priority": assessment.get("priority"),
+            "isDelayed": assessment.get("is_delayed"),
+            "etaHours": assessment.get("eta_hours"),
+            "warehouseLoad": round(float(warehouse_load) * 100) if warehouse_load is not None else None,
+            "trafficDelay": round(float(traffic_delay) * 100) if traffic_delay is not None else None,
+            "delayProbability": round(float(delay_prob) * 100) if delay_prob is not None else None,
+            "riskLevel": assessment.get("risk_level"),
+            "riskScore": assessment.get("risk_score"),
+            "rootCauses": assessment.get("root_causes", []),
+            "recommendedAction": assessment.get("recommended_action"),
+            "triggeredRules": policy.get("triggered_rules", []),
+        },
     }
 
 

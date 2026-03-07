@@ -7,6 +7,7 @@ from groq import Groq
 from .firebase_client import FirebaseManager
 from .risk_reasoning_agent import risk_reasoning_agent
 from .delay_predictor import predict_delay
+from .policy_engine import evaluate_policy
 
 # Carrier name → reliability score (0–1)
 _CARRIER_RELIABILITY = {
@@ -111,15 +112,20 @@ class IngestionAgent:
         for row in self._live_data:
             event = _to_risk_event(row)
             try:
-                # Get ML prediction first, inject into event so LLM can reason on it
+                # Step 1: ML model — predict delay probability
                 event["delay_probability"] = predict_delay(row)
+
+                # Step 2: LLM Risk Reasoning Agent — reasons on signals + ML score
                 assessment = risk_reasoning_agent(event)
                 assessment["delay_probability"] = event["delay_probability"]
-                # Enrich with raw context from Firebase for downstream agents
                 assessment["carrier"]    = row.get("carrier")
                 assessment["weather"]    = row.get("weather")
                 assessment["is_delayed"] = bool(row.get("is_delayed"))
                 assessment["priority"]   = row.get("shipment_priority")
+
+                # Step 3: Policy Engine — decides if human approval is needed
+                assessment["policy"] = evaluate_policy(assessment)
+
                 results.append(assessment)
             except Exception as exc:
                 results.append({"shipment_id": event["shipment_id"], "error": str(exc)})

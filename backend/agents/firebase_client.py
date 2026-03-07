@@ -25,7 +25,10 @@ class FirebaseManager:
 
     def fetch_live(self) -> list[dict]:
         """Fetch all records from the live_shipments node via the REST API."""
-        url = f"{self._base_url}/{self._live_collection}.json"
+        if self._live_collection:
+            url = f"{self._base_url}/{self._live_collection}.json"
+        else:
+            url = f"{self._base_url}/.json"  # root node
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()

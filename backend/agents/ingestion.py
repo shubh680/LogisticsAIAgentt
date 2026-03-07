@@ -1,12 +1,42 @@
 import os
 import json
+import time
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from groq import Groq
 from .firebase_client import FirebaseManager
+from .risk_reasoning_agent import risk_reasoning_agent
+
+# Carrier name → reliability score (0–1)
+_CARRIER_RELIABILITY = {
+    "BlueDart":  0.88,
+    "Swift":     0.72,
+    "Delhivery": 0.76,
+}
+
+
+def _to_risk_event(row: dict) -> dict:
+    """Map a Firebase shipment row to risk_reasoning_agent input fields."""
+    planned_str = row.get("planned_arrival", "")
+    try:
+        planned = datetime.fromisoformat(planned_str)
+        if planned.tzinfo is None:
+            planned = planned.replace(tzinfo=timezone.utc)
+        eta_hours = max((planned - datetime.now(timezone.utc)).total_seconds() / 3600, 0)
+    except (ValueError, TypeError):
+        eta_hours = 0.0
+
+    return {
+        "shipment_id":        row["shipment_id"],
+        "warehouse_load":     round(int(row.get("warehouse_load_pct", 0)) / 100, 2),
+        "carrier_reliability": _CARRIER_RELIABILITY.get(row.get("carrier", ""), 0.75),
+        "traffic_delay":      float(row.get("traffic_density", 0)),
+        "eta_hours":          round(eta_hours, 2),
+    }
 
 load_dotenv()
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama-3.1-8b-instant"
 
 SYSTEM_PROMPT = (
     "You are the Ingestion & Observation Agent in a multi-agent logistics AI system. "
@@ -33,7 +63,7 @@ class IngestionAgent:
     tool-calling and produces structured observations for downstream agents.
     """
 
-    def __init__(self, live_collection: str = "live_shipments"):
+    def __init__(self, live_collection: str = ""):
         self.db = FirebaseManager(live_collection)
         self._live_data: list[dict] = []
         self._client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -67,6 +97,31 @@ class IngestionAgent:
         return [
             row for row in self._live_data if row.get("shipment_priority") == "High"
         ]
+
+    def analyze_risks(self, delay_between_calls: float = 1.5) -> list[dict]:
+        """
+        Run risk_reasoning_agent on every shipment in the live cache.
+        Returns a list of risk assessment dicts, one per shipment.
+        """
+        if not self._live_data:
+            self.fetch_live()
+
+        results = []
+        for row in self._live_data:
+            event = _to_risk_event(row)
+            try:
+                assessment = risk_reasoning_agent(event)
+                # Enrich with raw context from Firebase for downstream agents
+                assessment["carrier"] = row.get("carrier")
+                assessment["weather"] = row.get("weather")
+                assessment["is_delayed"] = bool(row.get("is_delayed"))
+                assessment["priority"] = row.get("shipment_priority")
+                results.append(assessment)
+            except Exception as exc:
+                results.append({"shipment_id": event["shipment_id"], "error": str(exc)})
+            time.sleep(delay_between_calls)  # respect Groq rate limits
+
+        return results
 
     def _build_tools(self) -> tuple[list[dict], dict]:
         """Return Groq-compatible tool schemas and a dispatch map."""
@@ -117,6 +172,11 @@ class IngestionAgent:
                 },
                 default=str,
             )
+
+        def get_risk_analysis() -> str:
+            """Run risk reasoning agent on all live shipments and return results."""
+            assessments = self.analyze_risks()
+            return json.dumps(assessments, default=str)
 
         tool_schemas = [
             {
@@ -176,6 +236,18 @@ class IngestionAgent:
                     "parameters": {"type": "object", "properties": {}},
                 },
             },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_risk_analysis",
+                    "description": (
+                        "Run the Risk Reasoning Agent on all live shipments. "
+                        "Returns a risk assessment (risk_level, risk_score, root_causes, "
+                        "recommended_action) for every shipment."
+                    ),
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
         ]
 
         tool_map = {
@@ -185,6 +257,7 @@ class IngestionAgent:
             "get_delayed": get_delayed,
             "get_high_priority": get_high_priority,
             "get_summary_stats": get_summary_stats,
+            "get_risk_analysis": get_risk_analysis,
         }
 
         return tool_schemas, tool_map
@@ -192,8 +265,9 @@ class IngestionAgent:
     def observe(self) -> dict:
         """
         Primary agent entrypoint for multi-agent pipelines.
-        Autonomously fetches all live data, analyzes it, and returns a
-        structured observation dict for downstream agents to act on.
+        Step 1: LLM fetches live data and builds a structured observation.
+        Step 2: Python runs risk analysis separately and attaches results.
+        This avoids token overflow from feeding 100 shipments back into the LLM.
         """
         observation_prompt = (
             "Observe the current state of live shipments. "
@@ -211,9 +285,20 @@ class IngestionAgent:
             if raw.startswith("json"):
                 raw = raw[4:]
         try:
-            return json.loads(raw.strip())
+            observation = json.loads(raw.strip())
         except json.JSONDecodeError:
-            return {"raw_observation": raw}
+            observation = {"raw_observation": raw}
+
+        # Step 2: Risk analysis runs in Python — outside the LLM context window
+        observation["risk_assessments"] = self.analyze_risks()
+        levels = [r.get("risk_level") for r in observation["risk_assessments"] if "risk_level" in r]
+        observation["risk_summary"] = {
+            "low":    levels.count("low"),
+            "medium": levels.count("medium"),
+            "high":   levels.count("high"),
+        }
+
+        return observation
 
     def run(self, query: str, chat_history: list | None = None) -> str:
         """Send a natural-language query to the agent using Groq tool-calling."""
@@ -257,7 +342,7 @@ class IngestionAgent:
             # Execute each tool call and append results
             for tc in msg.tool_calls:
                 fn_name = tc.function.name
-                fn_args = json.loads(tc.function.arguments or "{}")
+                fn_args = json.loads(tc.function.arguments or "{}") or {}
                 fn = self._tool_map.get(fn_name)
                 result = fn(**fn_args) if fn else f"Unknown tool: {fn_name}"
                 messages.append(

@@ -29,6 +29,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
         "https://logistics-ai-agent-delta.vercel.app",
+        "https://logistics-ai-agentt.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],

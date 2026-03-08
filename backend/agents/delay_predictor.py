@@ -29,11 +29,19 @@ class DelayPredictor:
     """Loads the ML model once and exposes a predict() method."""
 
     def __init__(self):
-        self._encoders = joblib.load(_ENCODERS_PATH)
-        self._model    = xgb.XGBClassifier()
-        self._model.load_model(_MODEL_PATH)
+        try:
+            self._encoders = joblib.load(_ENCODERS_PATH)
+            self._model    = xgb.XGBClassifier()
+            self._model.load_model(_MODEL_PATH)
+            self._ready = True
+        except Exception as e:
+            import logging
+            logging.warning(f"DelayPredictor failed to load: {e}. Returning default 0.5.")
+            self._ready = False
 
     def predict(self, row: dict) -> float:
+        if not self._ready:
+            return 0.5
         """
         Predict delay probability for a single shipment row.
 

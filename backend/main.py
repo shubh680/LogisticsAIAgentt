@@ -24,7 +24,12 @@ app = FastAPI(title="Logistics AI Agent API")
 # Allow the Vite dev server and any local origin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://localhost:3000", "http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:8080",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://logistics-ai-agent-delta.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

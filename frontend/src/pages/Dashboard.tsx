@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQueryClient } from '@tanstack/react-query';
+import { API_BASE } from '@/lib/api';
 
 const Dashboard = () => {
   const { data: orders, isLoading } = useOrders();
@@ -20,7 +21,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!isAnalyzing) return;
     const interval = setInterval(async () => {
-      const res = await fetch('/api/analyze/status');
+      const res = await fetch(`${API_BASE}/api/analyze/status`);
       if (!res.ok) return;
       const data = await res.json();
       setAnalyzedCount(data.analyzed_count);
@@ -38,7 +39,7 @@ const Dashboard = () => {
   }, [isAnalyzing, qc]);
 
   const handleAnalyze = async () => {
-    const res = await fetch('/api/analyze', { method: 'POST' });
+    const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST' });
     if (res.ok) setIsAnalyzing(true);
   };
 

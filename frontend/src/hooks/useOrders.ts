@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { Order } from '@/types';
+import { API_BASE } from '@/lib/api';
 
 const fetchOrders = async (): Promise<Order[]> => {
-  const res = await fetch('/api/shipments');
+  const res = await fetch(`${API_BASE}/api/shipments`);
   if (!res.ok) throw new Error('Failed to fetch shipments');
   return res.json();
 };
 
 const fetchOrderById = async (id: string): Promise<Order | undefined> => {
-  const res = await fetch(`/api/shipments/${id}`);
+  const res = await fetch(`${API_BASE}/api/shipments/${id}`);
   if (res.status === 404) return undefined;
   if (!res.ok) throw new Error('Failed to fetch shipment');
   return res.json();

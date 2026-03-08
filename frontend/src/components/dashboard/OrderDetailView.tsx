@@ -16,6 +16,72 @@ const actionTypeColors: Record<string, string> = {
   notification: 'bg-primary/10 text-primary',
 };
 
+type JsonLike = Record<string, unknown> | unknown[] | string | number | boolean | null | undefined;
+
+const formatKey = (key: string) =>
+  key
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^./, c => c.toUpperCase());
+
+function PrimitiveValue({ value }: { value: JsonLike }) {
+  if (value === null || value === undefined) {
+    return <span className="text-muted-foreground">-</span>;
+  }
+  if (typeof value === 'boolean') {
+    return <span className={value ? 'text-green-600 font-medium' : 'text-destructive font-medium'}>{value ? 'True' : 'False'}</span>;
+  }
+  if (typeof value === 'number') {
+    return <span className="font-medium tabular-nums">{value}</span>;
+  }
+  return <span className="break-words">{String(value)}</span>;
+}
+
+function DataRenderer({ data, level = 0 }: { data: JsonLike; level?: number }) {
+  if (data === null || data === undefined) {
+    return <PrimitiveValue value={data} />;
+  }
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) {
+      return <span className="text-muted-foreground">No items</span>;
+    }
+    return (
+      <div className="space-y-2">
+        {data.map((item, idx) => (
+          <div key={`${level}-arr-${idx}`} className="rounded-md border bg-background/70 p-2">
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Item {idx + 1}</p>
+            <DataRenderer data={item as JsonLike} level={level + 1} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (typeof data === 'object') {
+    const entries = Object.entries(data as Record<string, unknown>);
+    if (entries.length === 0) {
+      return <span className="text-muted-foreground">No data</span>;
+    }
+
+    return (
+      <div className="space-y-2">
+        {entries.map(([key, value]) => {
+          const isNested = value !== null && typeof value === 'object';
+          return (
+            <div key={`${level}-${key}`} className="rounded-md border bg-background/70 p-2">
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{formatKey(key)}</p>
+              {isNested ? <DataRenderer data={value as JsonLike} level={level + 1} /> : <PrimitiveValue value={value as JsonLike} />}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return <PrimitiveValue value={data} />;
+}
+
 export function OrderDetailView({ order }: { order: Order }) {
   const navigate = useNavigate();
 
@@ -51,13 +117,17 @@ export function OrderDetailView({ order }: { order: Order }) {
         <Card>
           <CardHeader><CardTitle className="text-sm flex items-center gap-2">Input Data</CardTitle></CardHeader>
           <CardContent>
-            <pre className="text-xs bg-muted p-3 rounded-md overflow-auto">{JSON.stringify(order.inputData, null, 2)}</pre>
+            <div className="max-h-80 overflow-auto rounded-md bg-muted/40 p-3 text-xs">
+              <DataRenderer data={order.inputData} />
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle className="text-sm flex items-center gap-2">Output Data</CardTitle></CardHeader>
           <CardContent>
-            <pre className="text-xs bg-muted p-3 rounded-md overflow-auto">{JSON.stringify(order.outputData, null, 2)}</pre>
+            <div className="max-h-80 overflow-auto rounded-md bg-muted/40 p-3 text-xs">
+              <DataRenderer data={order.outputData} />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -99,11 +169,15 @@ export function OrderDetailView({ order }: { order: Order }) {
                       <div className="grid gap-2 md:grid-cols-2">
                         <div>
                           <p className="text-xs text-muted-foreground mb-1 font-medium">Input</p>
-                          <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">{JSON.stringify(step.input, null, 2)}</pre>
+                          <div className="max-h-32 overflow-auto rounded bg-muted/40 p-2 text-xs">
+                            <DataRenderer data={step.input} />
+                          </div>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground mb-1 font-medium">Output</p>
-                          <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">{JSON.stringify(step.output, null, 2)}</pre>
+                          <div className="max-h-32 overflow-auto rounded bg-muted/40 p-2 text-xs">
+                            <DataRenderer data={step.output} />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -164,11 +238,15 @@ export function OrderDetailView({ order }: { order: Order }) {
               <div className="grid gap-2 md:grid-cols-2 mt-3">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Input</p>
-                  <pre className="text-xs bg-muted p-2 rounded overflow-auto">{JSON.stringify(a.input, null, 2)}</pre>
+                  <div className="max-h-40 overflow-auto rounded bg-muted/40 p-2 text-xs">
+                    <DataRenderer data={a.input} />
+                  </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Output</p>
-                  <pre className="text-xs bg-muted p-2 rounded overflow-auto">{JSON.stringify(a.output, null, 2)}</pre>
+                  <div className="max-h-40 overflow-auto rounded bg-muted/40 p-2 text-xs">
+                    <DataRenderer data={a.output} />
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-2">

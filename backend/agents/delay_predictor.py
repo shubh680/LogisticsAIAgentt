@@ -16,6 +16,7 @@ import warnings
 import numpy as np
 import joblib
 import xgboost as xgb
+import sklearn.preprocessing  # Required for joblib to unpickle LabelEncoders
 
 warnings.filterwarnings("ignore")
 
